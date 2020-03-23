@@ -6,7 +6,7 @@
  *    Description:  
  *
  *        Version:  1.0
- *        Created:  23-03-20 13:36:07
+ *        Created:  23-03-20 12:46:06
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -20,12 +20,22 @@
 # define VECTOR_H
 
 struct Vector {
-		const void		*class; /* must be first for dereference by class functions */
-		unsigned char	*mem;
-		size_t			size;
-		size_t			cap;
-		void			(*pushback)(void *self, const unsigned char *mem);
+	size_t	size;
+	void	*(*ctor)(void *, va_list *);
+	void	*(*dtor)(void *);
+	void	*(*clone)(void *);
+	int		(*pushback)(void *, void *);
+	int		(*pushfront)(void *, void *);
+	void	*(*peek)(void *);
+	void	(*pop)(void *);
+	void	*(*get)(void *, size_t );
+	int		(*set)(void *, size_t , void *);
+	int		(*insert)(void *, size_t , void *);
+	void	(*remove)(void *, size_t);
 };
 
-extern const void		*Vector;
+void		*vecnew(const void *_Vector, ...);
+void		vecdestroy(void *self);
+void		*vecclone(void *self);
+
 #endif

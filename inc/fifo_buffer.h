@@ -1,12 +1,12 @@
 /*
  * =====================================================================================
  *
- *       Filename:  class.h
+ *       Filename:  fifo_buffer.h
  *
  *    Description:  
  *
  *        Version:  1.0
- *        Created:  23-03-20 12:46:06
+ *        Created:  23-03-20 13:36:07
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -16,18 +16,17 @@
  * =====================================================================================
  */
 
-#ifndef CLASS_H
-# define CLASS_H
+#ifndef FIFO_BUFFER_H
+# define FIFO_BUFFER_H
 
-struct Class {
-	size_t	size;
-	void	*(*ctor)(void *self, va_list *ap);
-	void	*(*dtor)(void *self);
-	void	*(*clone)(void *self);
+struct FiFoBuffer {
+		const struct Vector	*v; /* must be first for dereference by class functions */
+		void				**mem;
+		size_t				cap;
+		size_t				size;
+		size_t				front;
+		size_t				back;
 };
 
-void		*new(const void *_Class, ...);
-void		destroy(void *self);
-void		*clone(void *self);
-
+extern const void			*FiFoBuffer;
 #endif

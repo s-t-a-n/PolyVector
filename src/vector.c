@@ -6,7 +6,7 @@
  *    Description:  
  *
  *        Version:  1.0
- *        Created:  23-03-20 14:06:51
+ *        Created:  23-03-20 13:00:00
  *       Revision:  none
  *       Compiler:  gcc
  *
@@ -16,49 +16,51 @@
  * =====================================================================================
  */
 
-#include <string.h>
 #include <stdarg.h>
 #include <stdlib.h>
 
-#include "class.h"
 #include "vector.h"
 
-static void	*Vector_ctor(void *_self, va_list *ap)
+void	*vecnew(const void *_Vector, ...)
 {
-	struct Vector		*self = _self;
-	const unsigned char	*_mem = va_arg(*ap, const unsigned char *);
-	const size_t		_size = va_arg(*ap, const size_t);
-	const size_t		_cap= va_arg(*ap, const size_t);
-
-	self->mem = malloc(_cap);
-	self->size = _size;
-	self->cap = _cap;
-	if (self->mem)
-		memcpy(self->mem, _mem, _size);
-	return(self);
-}
-
-static void	*Vector_dtor(void *_self)
-{
-	struct Vector		*self = _self;
-
-	free(self->mem);
-	return (self);
-}
-
-/*
-void	*Vector_clone(void *_self)
-{
-	struct Vector		*self = _self;
+	const struct Vector	*vector = _Vector;
+	void				*obj;
 	
+	obj = malloc(vector->size);
+	if (obj)
+	{
+		/*  14: We  force  aconversion  ofpwhich  treats  the  beginning of  the  object as a pointer to astructClassand set the argumentclassas the value of this pointer.*/
+		* (const struct Vector **)obj = vector;
+		if(vector->ctor)
+		{
+			va_list ap;
+
+			va_start(ap, _Vector);
+			obj = vector->ctor(obj, &ap);
+			va_end(ap);
+		}
+	}
+	return (obj);
 }
-*/
 
-const struct Class _Vector = {
-	sizeof(struct Vector),
-	Vector_ctor,
-	Vector_dtor,
-	NULL
-};
+void	vecdestroy(void *self)
+{
+	const struct Vector	**obj = self;
 
-const void *Vector = &_Vector;
+	if (*obj && (*obj)->dtor)
+	{
+		self = (*obj)->dtor(self);
+		/* 14: If an object does not want to be deleted,its destructor would return a null pointer */
+		free(self);
+	}
+}
+
+void	*vecclone(void *self)
+{
+	const struct Vector	**obj = self;
+
+	if (*obj && (*obj)->clone)
+		return((*obj)->clone(self));	
+	else
+		return (NULL);
+}

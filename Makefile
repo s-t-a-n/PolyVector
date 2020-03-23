@@ -6,12 +6,12 @@ OBJ_D = obj
 INC_D = inc
 
 # C source and header files
-SRC =	$(SRC_D)/class.c													\
-		$(SRC_D)/vector.c													\
+SRC =	$(SRC_D)/vector.c													\
+		$(SRC_D)/fifo_buffer.c												\
 
 
-INC =	$(INC_D)/class.h													\
-		$(INC_D)/vector.h
+INC =	$(INC_D)/vector.h													\
+		$(INC_D)/fifo_buffer.h
 
 OBJ :=	$(SRC:$(SRC_D)/%.c=$(OBJ_D)/%.o)
 
@@ -39,12 +39,11 @@ CC = clang
 
 # compile flags
 CC_FLAGS = -Werror -Wextra -Wall
-CC_FLAGS_TESTS = -Werror -Wextra -Wall -g -fsanitize=address -DDEBUG
 
 # debugging or optimization flags
 ifeq ($(DEBUG),1)
     CC_FLAGS += -g -fsanitize=address -DDEBUG
-    #export  LSAN_OPTIONS=verbosity=1:log_threads=1
+    export  LSAN_OPTIONS=verbosity=1:log_threads=1
 else
     CC_FLAGS += -O3 -march=native
 endif
@@ -84,10 +83,10 @@ clean:
 	@$(RM) $(OBJ)
 	@$(RM) -r $(OBJ_D)
 
-vector_test: TEST='main_vector_t'
-vector_test: $(NAME)
+fifobuffer_test: TEST='main_fifobuffer_t'
+fifobuffer_test: $(NAME)
 	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)
-	@$(CC) $(CC_FLAGS_TESTS) -I$(INC_D) -o $(TEST) tests/$(TEST).c $(NAME)
+	@$(CC) $(CC_FLAGS) -I$(INC_D) -o $(TEST) tests/$(TEST).c $(NAME)
 	@if test -e $(CC_ERROR); then                                           \
         $(ECHO) "$(ERROR_STRING)\n" && $(CAT) $(CC_LOG);					\
     elif test -s $(CC_LOG); then                                            \
@@ -109,7 +108,7 @@ vector_test: $(NAME)
 fclean: clean
 	@$(RM) $(NAME)
 	@$(RM) -rf *.dSYM
-	@$(RM) -f main_vector_t
+	@$(RM) -f main_fifobuffer_t
 
 re: fclean all
 
