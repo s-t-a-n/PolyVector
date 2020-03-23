@@ -22,6 +22,7 @@
 #include <errno.h>
 
 #include "vector.h"
+#include "vector_errors.h"
 #include "fifo_buffer.h"
 
 static void		*ctor(void *_self, va_list *ap)
@@ -30,6 +31,8 @@ static void		*ctor(void *_self, va_list *ap)
 	const size_t			_cap= va_arg(*ap, const size_t);
 
 	self->mem = malloc(_cap);
+	if (!self->mem)
+			return(NULL);
 	self->size = 0;
 	self->front = 0;
 	self->back = -1;
@@ -106,7 +109,7 @@ static int		pushback(void *_self, void *item)
 	}
 	else
 	{
-		return(1);
+		return(VEC_FUL);
 	}
 }
 
@@ -120,15 +123,17 @@ static int		pushfront(void *self, void *item)
 static void		*peek(void *_self)
 {
 	const struct	FiFoBuffer *self = _self;
-
-	return(self->mem[self->front]);
+	if (self->size > 0)
+		return(self->mem[self->front]);
+	else
+		return(NULL);
 }
 
 static void		pop(void *_self)
 {
 	struct	FiFoBuffer *self = _self;
 
-	self->mem[self->front] = NULL; /* it is up to caller to free  */
+	self->mem[self->front] = NULL; /* it is up to caller to free memory */
 	if (self->size > 0)
 	{
 		if (self->front < self->cap - 1)
@@ -143,19 +148,26 @@ static void		pop(void *_self)
 	}
 }
 
-static void		*get(void *self, size_t index)
+static void		*get(void *_self, size_t index)
 {
-	return(NULL);
-	(void)self;
-	(void)index;
+	struct	FiFoBuffer *self = _self;
+
+	return (self->mem[index]);
 }
 
-static int		set(void *self, size_t index, void *item)
+static int		set(void *_self, size_t index, void *item)
 {
-	return(-254);
-	(void)self;
-	(void)index;
-	(void)item;
+	struct	FiFoBuffer *self = _self;
+	
+	if (index >= 0 && index < self->cap)
+	{
+		self->mem[index] = item;
+		return (0);
+	}
+	else
+	{
+		return (VEC_RUB);
+	}
 }
 
 static int		insert(void *self, size_t index, void *item)

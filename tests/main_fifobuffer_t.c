@@ -24,7 +24,7 @@
 #include "vector.h"
 #include "fifo_buffer.h"
 
-int	main(void)
+int		main(void)
 {
 	size_t cap = 512;
 
@@ -54,6 +54,8 @@ int	main(void)
 	printf("item : %s\n", fbuf->v->peek(fbuf));
 	fbuf->v->pop(fbuf);
 
+	//void *ptr = malloc(1024);
+	//ptr = NULL;
 	vecdestroy(fbuf);
 	return (0);
 }
