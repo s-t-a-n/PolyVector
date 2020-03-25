@@ -8,7 +8,7 @@ INC_D = inc
 # C source and header files
 SRC =	$(SRC_D)/vector.c													\
 		$(SRC_D)/fifo_buffer.c												\
-
+		$(SRC_D)/lafi_buffer.c												\
 
 INC =	$(INC_D)/vector.h													\
 		$(INC_D)/fifo_buffer.h

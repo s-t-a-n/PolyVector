@@ -26,7 +26,7 @@ void	*vecnew(const void *_Vector, ...)
 	const struct Vector	*vector = _Vector;
 	void				*obj;
 	
-	obj = malloc(vector->size);
+	obj = malloc(vector->selfsize);
 	if (obj)
 	{
 		/*  14: We  force  aconversion  ofpwhich  treats  the  beginning of  the  object as a pointer to astructClassand set the argumentclassas the value of this pointer.*/

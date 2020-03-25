@@ -20,7 +20,7 @@
 # define VECTOR_H
 
 struct Vector {
-	size_t	size;
+	size_t	selfsize;
 	void	*(*ctor)(void *, va_list *);
 	void	*(*dtor)(void *);
 	void	*(*clone)(void *);
@@ -32,6 +32,7 @@ struct Vector {
 	int		(*set)(void *, size_t , void *);
 	int		(*insert)(void *, size_t , void *);
 	void	(*remove)(void *, size_t);
+	size_t	(*size)(void *);
 };
 
 void		*vecnew(const void *_Vector, ...);

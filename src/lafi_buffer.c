@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  fifo_buffer.c
+ *       Filename:  lafi_buffer.c
  *
  *    Description:  
  *
@@ -23,26 +23,24 @@
 
 #include "vector.h"
 #include "vector_errors.h"
-#include "fifo_buffer.h"
+#include "lafi_buffer.h"
 
 static void		*ctor(void *_self, va_list *ap)
 {
-	struct FiFoBuffer	*self = _self;
+	struct LaFiBuffer	*self = _self;
 	const size_t			_cap= va_arg(*ap, const size_t);
 
 	self->mem = malloc(_cap);
 	if (!self->mem)
 			return(NULL);
-	self->size = 0;
-	self->front = 0;
-	self->back = -1;
+	self->index = -1;
 	self->cap = _cap;
 	return(self);
 }
 
 static void		*dtor(void *_self)
 {
-	struct FiFoBuffer	*self = _self;
+	struct LaFiBuffer	*self = _self;
 
 	free(self->mem);
 	return (self);
@@ -54,7 +52,7 @@ static void		*clone(void *self)
 }
 
 /*
-static int		grow(struct FiFoBuffer *self)
+static int		grow(struct LaFiBuffer *self)
 {
 	size_t newcap;
 	void *new;
@@ -91,21 +89,12 @@ if (self->size + 1 >= self->cap)
 
 static int		pushback(void *_self, void *item)
 {
-	struct FiFoBuffer *self = _self;
+	struct LaFiBuffer *self = _self;
 
-	if (self->size < self->cap)
+	if (self->index + 1 < self->cap)
 	{
-		if (self->back < self->cap - 1)
-		{
-			(self->back)++;
-			(self->size)++;
-		}
-		else
-		{
-			self->back = 0;
-			(self->size)++;
-		}
-		self->mem[self->back] = item;
+		(self->index)++;
+		self->mem[self->index] = item;
 		return (0);
 	}
 	else
@@ -123,35 +112,24 @@ static int		pushfront(void *self, void *item)
 
 static void		*peek(void *_self)
 {
-	const struct	FiFoBuffer *self = _self;
-	if (self->size > 0)
-		return(self->mem[self->front]);
-	else
-		return(NULL);
+	const struct	LaFiBuffer *self = _self;
+
+	return(self->mem[self->index]);
 }
 
 static void		pop(void *_self)
 {
-	struct	FiFoBuffer *self = _self;
+	struct	LaFiBuffer *self = _self;
 
-	self->mem[self->front] = NULL; /* it is up to caller to free memory */
-	if (self->size > 0)
-	{
-		if (self->front < self->cap - 1)
-		{
-			(self->front)++;
-		}
-		else
-		{
-			self->front = 0;
-		}
-		(self->size)--;
-	}
+	if (self->index >= 0)
+		self->mem[self->index] = NULL; /* it is up to caller to free memory */
+	if (self->index > 0)
+		(self->index)--;
 }
 
 static void		*get(void *_self, size_t index)
 {
-	struct	FiFoBuffer *self = _self;
+	struct	LaFiBuffer *self = _self;
 
 	if (index >= 0 && index < self->cap)
 		return (self->mem[index]);
@@ -161,7 +139,7 @@ static void		*get(void *_self, size_t index)
 
 static int		set(void *_self, size_t index, void *item)
 {
-	struct	FiFoBuffer *self = _self;
+	struct	LaFiBuffer *self = _self;
 	
 	if (index >= 0 && index < self->cap)
 	{
@@ -188,15 +166,14 @@ static void		remove(void *self, size_t index)
 	(void)index;
 }
 
-static size_t	size(void *_self)
+static size_t   size(void *_self)
 {
-	struct	FiFoBuffer *self = _self;
-
-	return (self->size);
+	struct  LaFiBuffer *self = _self;
+	
+	return (self->index + 1);
 }
-
-const struct Vector _FiFoBuffer = {
-	sizeof(struct FiFoBuffer),
+const struct Vector _LaFiBuffer = {
+	sizeof(struct LaFiBuffer),
 	ctor,
 	dtor,
 	clone,
@@ -211,4 +188,4 @@ const struct Vector _FiFoBuffer = {
 	size
 };
 
-const void *FiFoBuffer = &_FiFoBuffer;
+const void *LaFiBuffer = &_LaFiBuffer;
