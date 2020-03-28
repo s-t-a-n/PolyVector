@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  lafi_buffer.h
+ *       Filename:  fifobuffer.h
  *
  *    Description:  
  *
@@ -16,15 +16,19 @@
  * =====================================================================================
  */
 
-#ifndef LAFI_BUFFER_H
-# define LAFI_BUFFER_H
+#ifndef FIFOBUFFER_H
+# define FIFOBUFFER_H
 
-struct LaFiBuffer {
+struct FiFoBuffer {
 		const struct Vector	*v; /* must be first for dereference by class functions */
+		void				(*free)(void *);
+		void				*(*clone)(void *);
 		void				**mem;
 		size_t				cap;
-		size_t				index;
+		size_t				size;
+		size_t				front;
+		size_t				back;
 };
 
-extern const void			*LaFiBuffer;
+extern const void			*FiFoBuffer;
 #endif

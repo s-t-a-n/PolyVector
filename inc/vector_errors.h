@@ -21,7 +21,8 @@
 
 enum e_vector_error {
 	VEC_FUL = 1, /* */
-	VEC_RUB = 2 /* */
+	VEC_RUB = 2, /* */
+	VEC_STB = 3  /* function is merely stub */
 };
 
 #endif

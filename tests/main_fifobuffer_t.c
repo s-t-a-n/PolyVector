@@ -3,7 +3,7 @@
  *
  *       Filename:  main_fifobuffer_t.c
  *
- *    Description:  
+ *    Description:  Basic tests of fifobuffer
  *
  *        Version:  1.0
  *        Created:  23-03-20 14:34:39
@@ -22,40 +22,50 @@
 #include <stdlib.h>
 
 #include "vector.h"
-#include "fifo_buffer.h"
+#include "fifobuffer.h"
 
 int		main(void)
 {
 	size_t cap = 512;
 
-	struct FiFoBuffer	*fbuf = vecnew(FiFoBuffer, cap);
+	struct FiFoBuffer	*fbuf = vecnew(FiFoBuffer, cap, free, strdup);
 
 	int error = 0;
 
-	error += fbuf->v->pushback(fbuf, "1");
-	error += fbuf->v->pushback(fbuf, "2");
-	error += fbuf->v->pushback(fbuf, "3");
-	error += fbuf->v->pushback(fbuf, "4");
+	error += fbuf->v->push(fbuf, strdup("1"));
+	error += fbuf->v->push(fbuf, strdup("2"));
+	error += fbuf->v->push(fbuf, strdup("3"));
+	error += fbuf->v->push(fbuf, strdup("4"));
+	error += fbuf->v->push(fbuf, strdup("5"));
+	error += fbuf->v->push(fbuf, strdup("6"));
+	error += fbuf->v->push(fbuf, strdup("7"));
+	error += fbuf->v->push(fbuf, strdup("8"));
+	error += fbuf->v->push(fbuf, strdup("9"));
+	error += fbuf->v->pushback(fbuf, strdup("10"));
 
-	printf("errors : %i\n", error);
+	printf("errors : %i, size of vec : %lu\n", error, fbuf->v->size(fbuf));
 
-	printf("item : %s\n", fbuf->v->peek(fbuf));
-	fbuf->v->pop(fbuf);
+	struct FiFoBuffer *clone = vecclone(fbuf);
 
-	printf("item : %s\n", fbuf->v->peek(fbuf));
-	fbuf->v->pop(fbuf);
+	//fbuf->v->set(fbuf, 2, strdup("differ"));
 
-	printf("item : %s\n", fbuf->v->peek(fbuf));
-	fbuf->v->pop(fbuf);
+	for (int i = 0; i < 10; i++)
+	{
+		char *str = clone->v->peek(clone);
+		printf("clone : %s\n", str);
+		clone->free(str);
+		clone->v->pop(clone);
+	}
 
-	printf("item : %s\n", fbuf->v->peek(fbuf));
-	fbuf->v->pop(fbuf);
+	for (int i = 0; i < 5; i++)
+	{
+		char *str = fbuf->v->peek(fbuf);
+		printf("fbuf : %s\n", str);
+		fbuf->free(str);
+		fbuf->v->pop(fbuf);
+	}
 
-	printf("item : %s\n", fbuf->v->peek(fbuf));
-	fbuf->v->pop(fbuf);
-
-	//void *ptr = malloc(1024);
-	//ptr = NULL;
 	vecdestroy(fbuf);
+	vecdestroy(clone);
 	return (0);
 }
