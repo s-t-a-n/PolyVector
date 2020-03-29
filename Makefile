@@ -39,7 +39,7 @@ CAT=cat
 CC = clang
 
 # compile flags
-CC_FLAGS = #-Werror -Wextra -Wall
+CC_FLAGS = -Werror -Wextra -Wall
 
 # debugging or optimization flags
 ifeq ($(DEBUG),1)
