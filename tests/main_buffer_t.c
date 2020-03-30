@@ -27,7 +27,7 @@
 int		main(void)
 {
 	size_t cap = 2;
-	size_t abscap = 6;
+	size_t abscap = 12;
 
 	struct Buffer	*buf = vecnew(Buffer, cap, abscap, free, strdup);
 
@@ -53,9 +53,18 @@ int		main(void)
 	printf("errors : %i, size of buf : %lu\n", error, buf->v->size(buf));
 
 	struct Buffer *clone = vecclone(buf);
-	exit(0);
-	error += buf->v->set(buf, 8, strdup("differ"));
-	error += clone->v->insert(clone, 2, strdup("insert"));
+
+	void *ptr;
+
+	ptr = strdup("differ");
+	error = buf->v->set(buf, 8, ptr);
+	if (error != 0)
+			free(ptr);
+	ptr = strdup("insert");
+	error += clone->v->insert(clone, 2, ptr);
+	if (error != 0)
+			free(ptr);
+
 	clone->v->remove(clone, 5);
 
 	printf("errors : %i, size of clone : %lu\n", error, clone->v->size(clone));
