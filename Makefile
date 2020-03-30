@@ -43,6 +43,9 @@ CC = clang
 # compile flags
 CC_FLAGS = -Werror -Wextra -Wall
 
+# flags for criterion tests
+CRIT_FLAGS =  --full-stats --verbose
+
 # debugging or optimization flags
 ifeq ($(DEBUG),1)
     CC_FLAGS += -g -fsanitize=address -DDEBUG
@@ -87,6 +90,27 @@ clean:
 	@$(RM) $(OBJ)
 	@$(RM) -r $(OBJ_D)
 
+buffer_crit_test: TEST='main_buffer_crit'
+buffer_crit_test: $(NAME)
+	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)
+	@$(CC) $(CC_FLAGS) -I$(INC_D) -lcriterion -o $(TEST) tests/$(TEST).c $(NAME)
+	@if test -e $(CC_ERROR); then                                           \
+        $(ECHO) "$(ERROR_STRING)\n" && $(CAT) $(CC_LOG);					\
+    elif test -s $(CC_LOG); then                                            \
+        $(ECHO) "$(WARN_STRING)\n" && $(CAT) $(CC_LOG);                     \
+    else                                                                    \
+        $(ECHO) "$(OK_STRING)\n";                                           \
+    fi
+	@$(ECHO) "Running $(TEST)...\n"
+	@time $(DBG) ./$(TEST) $(CRIT_FLAGS) && $(RM) -f $(TEST) && $(RM) -rf $(TEST).dSYM 2>$(CC_LOG) || touch $(CC_ERROR)
+	@if test -e $(CC_ERROR); then                                           \
+		$(ECHO) "Completed $(TEST): $(ERROR_STRING)\n" && $(CAT) $(CC_LOG);		\
+    elif test -s $(CC_LOG); then											\
+		$(ECHO) "Completed $(TEST): $(WARN_STRING)\n" && $(CAT) $(CC_LOG);		\
+    else                                                                    \
+		$(ECHO) "Completed $(TEST): $(OK_STRING)\n";								\
+    fi
+	@$(RM) -f $(CC_LOG) $(CC_ERROR)
 buffer_test: TEST='main_buffer_t'
 buffer_test: $(NAME)
 	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)

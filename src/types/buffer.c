@@ -219,7 +219,7 @@ static int		insert(void *_self, size_t _index, void *item)
 	
 	memmove(self->mem + _index + 1,
 			self->mem + _index,
-			(self->size - _index + 1) * sizeof(void *));
+			(self->size - _index) * sizeof(void *));
 	self->mem[_index] = item;
 	(self->index)++;
 	(self->size)++;
@@ -237,7 +237,7 @@ static void		remove(void *_self, size_t _index)
 		{
 			memmove(self->mem + _index,
 					self->mem + _index + 1,
-					(self->size - _index) * sizeof(void *));
+					(self->size - (_index + 1)) * sizeof(void *));
 		}
 		self->mem[self->index] = NULL;
 		(self->index)--;
