@@ -20,9 +20,11 @@
 # define VECTOR_ERRORS_H
 
 enum e_vector_error {
-	VEC_FUL = 1, /* */
-	VEC_RUB = 2, /* */
-	VEC_STB = 3  /* function is merely stub */
+	VEC_FUL = 1, /* vector is full and cannot/may not grow */
+	VEC_CAP = 2, /* cannot grow; abscap was reached */
+	VEC_RUB = 3, /* request was out of bounds (invalid index) */
+	VEC_MAL = 3, /* malloc failure */
+	VEC_STB = 4  /* function is merely stub */
 };
 
 #endif

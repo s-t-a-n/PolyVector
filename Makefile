@@ -7,12 +7,14 @@ INC_D = inc
 
 # C source and header files
 SRC =	$(SRC_D)/vector.c													\
-		$(SRC_D)/fifobuffer.c												\
-		$(SRC_D)/lifobuffer.c												\
+		$(SRC_D)/types/fifobuffer.c											\
+		$(SRC_D)/types/lifobuffer.c											\
+		$(SRC_D)/types/buffer.c												\
 
 INC =	$(INC_D)/vector.h													\
-		$(INC_D)/fifobuffer.h												\
-		$(INC_D)/lifobuffer.h
+		$(INC_D)/types/fifobuffer.h											\
+		$(INC_D)/types/lifobuffer.h											\
+		$(INC_D)/types/buffer.h												\
 
 OBJ :=	$(SRC:$(SRC_D)/%.c=$(OBJ_D)/%.o)
 
@@ -66,6 +68,7 @@ $(NAME): $(OBJ_D) $(OBJ) $(INC)
 
 $(OBJ_D):
 	@mkdir -p $(OBJ_D)
+	@mkdir -p $(OBJ_D)/types
 
 $(OBJ): $(OBJ_D)/%.o: $(SRC_D)/%.c
 	@$(ECHO) "Compiling $<..."
@@ -83,6 +86,28 @@ $(OBJ): $(OBJ_D)/%.o: $(SRC_D)/%.c
 clean:
 	@$(RM) $(OBJ)
 	@$(RM) -r $(OBJ_D)
+
+buffer_test: TEST='main_buffer_t'
+buffer_test: $(NAME)
+	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)
+	@$(CC) $(CC_FLAGS) -I$(INC_D) -o $(TEST) tests/$(TEST).c $(NAME)
+	@if test -e $(CC_ERROR); then                                           \
+        $(ECHO) "$(ERROR_STRING)\n" && $(CAT) $(CC_LOG);					\
+    elif test -s $(CC_LOG); then                                            \
+        $(ECHO) "$(WARN_STRING)\n" && $(CAT) $(CC_LOG);                     \
+    else                                                                    \
+        $(ECHO) "$(OK_STRING)\n";                                           \
+    fi
+	@$(ECHO) "Running $(TEST)...\n"
+	@time $(DBG) ./$(TEST) && $(RM) -f $(TEST) && $(RM) -rf $(TEST).dSYM 2>$(CC_LOG) || touch $(CC_ERROR)
+	@if test -e $(CC_ERROR); then                                           \
+		$(ECHO) "Completed $(TEST): $(ERROR_STRING)\n" && $(CAT) $(CC_LOG);		\
+    elif test -s $(CC_LOG); then											\
+		$(ECHO) "Completed $(TEST): $(WARN_STRING)\n" && $(CAT) $(CC_LOG);		\
+    else                                                                    \
+		$(ECHO) "Completed $(TEST): $(OK_STRING)\n";								\
+    fi
+	@$(RM) -f $(CC_LOG) $(CC_ERROR)
 
 fifobuffer_test: TEST='main_fifobuffer_t'
 fifobuffer_test: $(NAME)

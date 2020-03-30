@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  fifobuffer.c
+ *       Filename:  lifobuffer.c
  *
  *    Description:  
  *
@@ -23,21 +23,19 @@
 
 #include "vector.h"
 #include "vector_errors.h"
-#include "fifobuffer.h"
+#include "types/lifobuffer.h"
 
 static void		*ctor(void *_self, va_list *ap)
 {
-	struct FiFoBuffer	*self = _self;
+	struct LiFoBuffer	*self = _self;
 	const size_t		_cap = va_arg(*ap, const size_t);
 	const void			*_free = va_arg(*ap, const void *);
-	const void			*_clone= va_arg(*ap, const void *);
-
+	const void			*_clone = va_arg(*ap, const void *);
 	self->mem = malloc(_cap * sizeof(void *));
 	if (!self->mem)
 			return (NULL);
 	self->size = 0;
-	self->front = 0;
-	self->back = -1;
+	self->index = -1;
 	self->cap = _cap;
 	self->free = _free;
 	self->clone = _clone;
@@ -46,7 +44,7 @@ static void		*ctor(void *_self, va_list *ap)
 
 static void		*dtor(void *_self)
 {
-	struct FiFoBuffer	*self = _self;
+	struct LiFoBuffer	*self = _self;
 
 	while (self->size > 0)
 	{
@@ -59,8 +57,8 @@ static void		*dtor(void *_self)
 
 static void		*clone(void *_self)
 {
-	const struct FiFoBuffer	*self = _self;
-	struct FiFoBuffer	*clone;
+	const struct LiFoBuffer *self = _self;
+	struct LiFoBuffer		*clone;
 
 	clone = malloc(self->v->selfsize);
 	if (clone)
@@ -71,24 +69,12 @@ static void		*clone(void *_self)
 			clone->v = self->v;
 			clone->cap = self->cap;
 			clone->size = self->size;
-			clone->front = self->front;
-			clone->back = self->cap;
+			clone->index = self->index;
 			clone->free = self->free;
 			clone->clone = self->clone;
 
 			for (size_t i = 0; i < self->size; i++)
-			{
-				if (self->front + i >= self->cap)
-				{
-					const int j = self->front + i - self->cap;
-					clone->mem[j] = self->clone(self->mem[j]);
-				}
-				else
-				{
-					const int k = self->front + i;
-					clone->mem[k] = self->clone(self->mem[k]);
-				}
-			}
+				clone->mem[i] = self->clone(self->mem[i]);
 		}
 		else
 		{
@@ -99,53 +85,14 @@ static void		*clone(void *_self)
 	return (clone);
 }
 
-/*
-static int		grow(struct FiFoBuffer *self)
-{
-	size_t newcap;
-	void *new;
-
-	newcap = self->cap * 2;
-	if (newcap <= self->abscap)
-	{
-		new = realloc(self->mem, newcap);
-		if (new)
-		{
-			memcpy(new, self->mem, self->size);
-			self->cap = newcap;
-			return (0);
-		}
-		else
-		{
-			return (1);
-		}
-	}
-	else
-	{
-		return (2);
-	}
-}
-*/
-
-/*
-if (self->size + 1 >= self->cap)
-{
-	if ((int err = grow(self)) != 0)
-		return (err);
-}
-*/
-
 static int		push(void *_self, void *item)
 {
-	struct FiFoBuffer *self = _self;
+	struct LiFoBuffer *self = _self;
 
 	if (self->size < self->cap)
 	{
-		if (self->back < self->cap - 1)
-			(self->back)++;
-		else
-			self->back = 0;
-		self->mem[self->back] = item;
+		(self->index)++;
+		self->mem[self->index] = item;
 		(self->size)++;
 		return (0);
 	}
@@ -156,7 +103,7 @@ static int		push(void *_self, void *item)
 }
 static int		pushback(void *_self, void *item)
 {
-	return (push(_self, item));
+		return (push(_self, item));
 }
 
 static int		pushfront(void *self, void *item)
@@ -168,28 +115,22 @@ static int		pushfront(void *self, void *item)
 
 static void		*peek(void *_self)
 {
-	const struct	FiFoBuffer *self = _self;
+	const struct	LiFoBuffer *self = _self;
+
 	if (self->size > 0)
-		return (self->mem[self->front]);
+		return (self->mem[self->index]);
 	else
 		return (NULL);
 }
 
 static void		pop(void *_self)
 {
-	struct	FiFoBuffer *self = _self;
+	struct	LiFoBuffer *self = _self;
 
-	self->mem[self->front] = NULL; /* it is up to caller to free memory */
 	if (self->size > 0)
 	{
-		if (self->front < self->cap - 1)
-		{
-			(self->front)++;
-		}
-		else
-		{
-			self->front = 0;
-		}
+		self->mem[self->index] = NULL; /* it is up to caller to free memory */
+		(self->index)--;
 		(self->size)--;
 	}
 }
@@ -199,9 +140,8 @@ static void		*get(void *_self, size_t index)
 	return (NULL);
 	(void)_self;
 	(void)index;
-
 	/*
-	struct	FiFoBuffer *self = _self;
+	struct	LiFoBuffer *self = _self;
 
 	if (index >= 0 && index < self->cap)
 		return (self->mem[index]);
@@ -218,11 +158,10 @@ static int		set(void *_self, size_t index, void *item)
 	(void)item;
 
 	/*
-	struct	FiFoBuffer *self = _self;
+	struct	LiFoBuffer *self = _self;
 	
 	if (index >= 0 && index < self->cap)
 	{
-		self->free(self->mem[index]);
 		self->mem[index] = item;
 		return (0);
 	}
@@ -247,15 +186,14 @@ static void		remove(void *self, size_t index)
 	(void)index;
 }
 
-static size_t	size(void *_self)
+static size_t   size(void *_self)
 {
-	struct	FiFoBuffer *self = _self;
-
+	struct  LiFoBuffer *self = _self;
+	
 	return (self->size);
 }
-
-const struct Vector _FiFoBuffer = {
-	sizeof(struct FiFoBuffer),
+const struct Vector _LiFoBuffer = {
+	sizeof(struct LiFoBuffer),
 	ctor,
 	dtor,
 	clone,
@@ -271,4 +209,4 @@ const struct Vector _FiFoBuffer = {
 	size
 };
 
-const void *FiFoBuffer = &_FiFoBuffer;
+const void *LiFoBuffer = &_LiFoBuffer;

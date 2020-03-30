@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "vector.h"
-#include "lifobuffer.h"
+#include "types/lifobuffer.h"
 
 int		main(void)
 {

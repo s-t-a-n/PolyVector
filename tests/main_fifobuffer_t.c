@@ -22,7 +22,7 @@
 #include <stdlib.h>
 
 #include "vector.h"
-#include "fifobuffer.h"
+#include "types/fifobuffer.h"
 
 int		main(void)
 {
