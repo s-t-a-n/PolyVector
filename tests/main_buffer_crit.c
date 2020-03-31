@@ -27,6 +27,17 @@
 #include "vector.h"
 #include "types/buffer.h"
 
+static void	t_flush_buffer(void *vec)
+{
+		struct Buffer *ptr = vec;
+	
+		while (ptr->v->size(ptr) > 0)
+		{
+			free(ptr->v->peek(ptr));
+			ptr->v->pop(ptr);
+		}
+}
+
 Test(generic, init_destroy)
 {
 		void *ptr = vecnew(Buffer, 1, 1, NULL, free, strdup);
@@ -55,11 +66,7 @@ Test(generic, cap)
 		cr_assert(error > 0);
 
 		cr_assert(ptr->v->size(ptr) == 2);
-		while (ptr->v->size(ptr) > 0)
-		{
-			free(ptr->v->peek(ptr));
-			ptr->v->pop(ptr);
-		}
+		t_flush_buffer(ptr);
 		cr_assert(ptr->v->peek(ptr) == NULL);
 		cr_assert(ptr->v->size(ptr) == 0);
 		vecdestroy(ptr);
@@ -132,11 +139,7 @@ Test(generic, insert_remove)
 		cr_assert(strcmp(ptr->v->get(ptr, 0), "String 0") == 0);
 		cr_assert(strcmp(ptr->v->get(ptr, 1), "String 2") == 0);
 
-		while (ptr->v->size(ptr) > 0)
-		{
-			free(ptr->v->peek(ptr));
-			ptr->v->pop(ptr);
-		}
+		t_flush_buffer(ptr);
 		cr_assert(ptr->v->peek(ptr) == NULL);
 		cr_assert(ptr->v->size(ptr) == 0);
 		vecdestroy(ptr);
