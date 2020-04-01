@@ -6,5 +6,6 @@ Implemented are:
 1. Dynamic buffer
 2. Static First-In-First-Out Buffer
 3. Static Last-In-First-Out Buffer
+4. Static First-In-First-Out Ringbuffer
 
 Code is following (or just blatantly ripping) https://www.cs.rit.edu/~ats/books/ooc.pdf
