@@ -3,7 +3,7 @@
  *
  *       Filename:  buffer.c
  *
- *    Description:  
+ *    Description:  dynamic buffer with arbitary access functions
  *
  *        Version:  1.0
  *        Created:  23-03-20 14:06:51

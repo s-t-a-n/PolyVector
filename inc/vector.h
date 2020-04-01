@@ -3,7 +3,7 @@
  *
  *       Filename:  vector.h
  *
- *    Description:  
+ *    Description: Vector class prototypes
  *
  *        Version:  1.0
  *        Created:  23-03-20 12:46:06

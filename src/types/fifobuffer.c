@@ -3,7 +3,7 @@
  *
  *       Filename:  fifobuffer.c
  *
- *    Description:  
+ *    Description:  static buffer with first-in first-out push/pop
  *
  *        Version:  1.0
  *        Created:  23-03-20 14:06:51

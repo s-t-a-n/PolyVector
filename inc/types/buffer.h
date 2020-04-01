@@ -3,7 +3,7 @@
  *
  *       Filename:  buffer.h
  *
- *    Description:  
+ *    Description:  dynamic buffer with arbitary access functions
  *
  *        Version:  1.0
  *        Created:  23-03-20 13:36:07

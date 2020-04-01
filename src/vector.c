@@ -3,7 +3,7 @@
  *
  *       Filename:  vector.c
  *
- *    Description:  
+ *    Description: Vector class functions
  *
  *        Version:  1.0
  *        Created:  23-03-20 13:00:00

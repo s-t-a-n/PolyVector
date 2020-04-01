@@ -3,7 +3,7 @@
  *
  *       Filename:  main_buffer_crit.c
  *
- *    Description:  Basic tests of fifobuffer
+ *    Description:  Basic tests of buffer using Criterion
  *
  *        Version:  1.0
  *        Created:  23-03-20 14:34:39
