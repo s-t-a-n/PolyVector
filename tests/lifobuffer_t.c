@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  main_lifobuffer_t.c
+ *       Filename:  lifobuffer_t.c
  *
  *    Description:  Basic tests of lifobuffer
  *

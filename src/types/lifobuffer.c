@@ -140,14 +140,6 @@ static void		*get(void *_self, size_t index)
 	return (NULL);
 	(void)_self;
 	(void)index;
-	/*
-	struct	LiFoBuffer *self = _self;
-
-	if (index >= 0 && index < self->cap)
-		return (self->mem[index]);
-	else
-		return (NULL);
-	*/
 }
 
 static int		set(void *_self, size_t index, void *item)
@@ -156,20 +148,6 @@ static int		set(void *_self, size_t index, void *item)
 	(void)_self;
 	(void)index;
 	(void)item;
-
-	/*
-	struct	LiFoBuffer *self = _self;
-	
-	if (index >= 0 && index < self->cap)
-	{
-		self->mem[index] = item;
-		return (0);
-	}
-	else
-	{
-		return (VEC_RUB);
-	}
-	*/
 }
 
 static int		insert(void *self, size_t index, void *item)

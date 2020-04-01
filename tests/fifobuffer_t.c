@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  main_fifobuffer_t.c
+ *       Filename:  fifobuffer_t.c
  *
  *    Description:  Basic tests of fifobuffer
  *

@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  main_buffer_t.c
+ *       Filename:  buffer_t.c
  *
  *    Description:  Basic tests of buffer
  *

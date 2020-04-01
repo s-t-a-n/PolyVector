@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  main_buffer_crit.c
+ *       Filename:  buffer_crit.c
  *
  *    Description:  Basic tests of buffer using Criterion
  *
@@ -45,11 +45,11 @@ Test(generic, init_destroy)
 		vecdestroy(ptr);
 }
 
-Test(generic, cap)
+Test(generic, cap_abccap)
 {
-		int def = 1;
-		int cap = 2;
-		struct Buffer *ptr = vecnew(Buffer, def, cap, free, strdup);
+		int cap = 1;
+		int abscap = 2;
+		struct Buffer *ptr = vecnew(Buffer, cap, abscap, free, strdup);
 		cr_assert_not_null(ptr);
 
 		void *str = strdup("String");
@@ -62,8 +62,8 @@ Test(generic, cap)
 
 		str = strdup("String");
 		error = ptr->v->push(ptr, str);
-		free(str);
 		cr_assert(error > 0);
+		free(str);
 
 		cr_assert(ptr->v->size(ptr) == 2);
 		t_flush_buffer(ptr);
@@ -110,10 +110,10 @@ Test(generic, set_get)
 
 Test(generic, insert_remove)
 {
-		int def = 1;
-		int cap = 3;
+		int cap = 1;
+		int abscap = 3;
 
-		struct Buffer *ptr = vecnew(Buffer, def, cap, free, strdup);
+		struct Buffer *ptr = vecnew(Buffer, cap, abscap, free, strdup);
 		cr_assert_not_null(ptr);
 		void *str = strdup("String 0");
 		int error = ptr->v->push(ptr, str);

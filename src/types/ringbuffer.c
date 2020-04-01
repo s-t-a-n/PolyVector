@@ -3,7 +3,8 @@
  *
  *       Filename:  fifobuffer.c
  *
- *    Description:  static buffer with first-in first-out push/pop
+ *    Description:  static ringbuffer with first-in first-out push/pop
+ *    				(frees and overwrites when buffer is full)
  *
  *        Version:  1.0
  *        Created:  23-03-20 14:06:51
@@ -23,11 +24,11 @@
 
 #include "vector.h"
 #include "vector_errors.h"
-#include "types/fifobuffer.h"
+#include "types/ringbuffer.h"
 
 static void		*ctor(void *_self, va_list *ap)
 {
-	struct FiFoBuffer	*self = _self;
+	struct RingBuffer	*self = _self;
 	const size_t		_cap = va_arg(*ap, const size_t);
 	const void			*_free = va_arg(*ap, const void *);
 	const void			*_clone= va_arg(*ap, const void *);
@@ -46,7 +47,7 @@ static void		*ctor(void *_self, va_list *ap)
 
 static void		*dtor(void *_self)
 {
-	struct FiFoBuffer	*self = _self;
+	struct RingBuffer	*self = _self;
 
 	while (self->size > 0)
 	{
@@ -59,8 +60,8 @@ static void		*dtor(void *_self)
 
 static void		*clone(void *_self)
 {
-	const struct FiFoBuffer	*self = _self;
-	struct FiFoBuffer	*clone;
+	const struct RingBuffer	*self = _self;
+	struct RingBuffer	*clone;
 
 	clone = malloc(self->v->selfsize);
 	if (clone)
@@ -101,23 +102,20 @@ static void		*clone(void *_self)
 
 static int		push(void *_self, void *item)
 {
-	struct FiFoBuffer *self = _self;
+	struct RingBuffer *self = _self;
 
-	if (self->size < self->cap)
-	{
-		if (self->back < self->cap - 1)
-			(self->back)++;
-		else
-			self->back = 0;
-		self->mem[self->back] = item;
-		(self->size)++;
-		return (0);
-	}
+	if (self->back < self->cap - 1)
+		(self->back)++;
 	else
-	{
-		return (VEC_FUL);
-	}
+		self->back = 0;
+	if (self->size >= self->cap)
+		self->free(self->mem[self->back]);
+	else
+		(self->size)++;
+	self->mem[self->back] = item;
+	return (0);
 }
+
 static int		pushback(void *_self, void *item)
 {
 	return (push(_self, item));
@@ -132,7 +130,7 @@ static int		pushfront(void *self, void *item)
 
 static void		*peek(void *_self)
 {
-	const struct	FiFoBuffer *self = _self;
+	const struct	RingBuffer *self = _self;
 	if (self->size > 0)
 		return (self->mem[self->front]);
 	else
@@ -141,7 +139,7 @@ static void		*peek(void *_self)
 
 static void		pop(void *_self)
 {
-	struct	FiFoBuffer *self = _self;
+	struct	RingBuffer *self = _self;
 
 	self->mem[self->front] = NULL; /* it is up to caller to free memory */
 	if (self->size > 0)
@@ -189,13 +187,13 @@ static void		remove(void *self, size_t index)
 
 static size_t	size(void *_self)
 {
-	struct	FiFoBuffer *self = _self;
+	struct	RingBuffer *self = _self;
 
 	return (self->size);
 }
 
-const struct Vector _FiFoBuffer = {
-	sizeof(struct FiFoBuffer),
+const struct Vector _RingBuffer = {
+	sizeof(struct RingBuffer),
 	ctor,
 	dtor,
 	clone,
@@ -211,4 +209,4 @@ const struct Vector _FiFoBuffer = {
 	size
 };
 
-const void *FiFoBuffer = &_FiFoBuffer;
+const void *RingBuffer = &_RingBuffer;
