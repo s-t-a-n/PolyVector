@@ -113,7 +113,7 @@ static int		pushfront(void *self, void *item)
 	(void)item;
 }
 
-static void		*peek(void *_self)
+static void		*peekback(void *_self)
 {
 	const struct	LiFoBuffer *self = _self;
 
@@ -123,7 +123,18 @@ static void		*peek(void *_self)
 		return (NULL);
 }
 
-static void		pop(void *_self)
+static void		*peekfront(void *_self)
+{
+	return (NULL);
+	(void)_self;
+}
+
+static void		*peek(void *_self)
+{
+	return (peekback(_self));
+}
+
+static void		popback(void *_self)
 {
 	struct	LiFoBuffer *self = _self;
 
@@ -133,6 +144,15 @@ static void		pop(void *_self)
 		(self->index)--;
 		(self->size)--;
 	}
+}
+
+static void		popfront(void *_self)
+{
+	(void)_self;
+}
+static void		pop(void *_self)
+{
+	popback(_self);
 }
 
 static void		*get(void *_self, size_t index)
@@ -179,7 +199,11 @@ const struct Vector _LiFoBuffer = {
 	pushback,
 	pushfront,
 	peek,
+	peekback,
+	peekfront,
 	pop,
+	popback,
+	popfront,
 	get,
 	set,
 	insert,

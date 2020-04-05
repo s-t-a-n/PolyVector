@@ -128,7 +128,13 @@ static int		pushfront(void *self, void *item)
 	(void)item;
 }
 
-static void		*peek(void *_self)
+static void		*peekback(void *_self)
+{
+	return (NULL);
+	(void)_self;
+}
+
+static void		*peekfront(void *_self)
 {
 	const struct	RingBuffer *self = _self;
 	if (self->size > 0)
@@ -137,7 +143,17 @@ static void		*peek(void *_self)
 		return (NULL);
 }
 
-static void		pop(void *_self)
+static void		*peek(void *_self)
+{
+	return (peekfront(_self));
+}
+
+static void		popback(void *_self)
+{
+	(void)_self;	
+}
+
+static void		popfront(void *_self)
 {
 	struct	RingBuffer *self = _self;
 
@@ -154,6 +170,11 @@ static void		pop(void *_self)
 		}
 		(self->size)--;
 	}
+}
+
+static void		pop(void *_self)
+{
+	popfront(_self);
 }
 
 static void		*get(void *_self, size_t index)
@@ -201,7 +222,11 @@ const struct Vector _RingBuffer = {
 	pushback,
 	pushfront,
 	peek,
+	peekback,
+	peekfront,
 	pop,
+	popback,
+	popfront,
 	get,
 	set,
 	insert,

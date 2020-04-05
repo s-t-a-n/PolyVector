@@ -27,7 +27,8 @@ struct Buffer {
 		size_t				cap;
 		size_t				abscap;
 		size_t				size;
-		size_t				index;
+		size_t				front;
+		size_t				back;
 };
 
 extern const void			*Buffer;

@@ -202,6 +202,12 @@ lifobuffer_test: $(NAME)
     fi
 	@$(RM) -f $(CC_LOG) $(CC_ERROR)
 
+test: $(NAME)
+	@make buffer_crit_test
+	#@make fifobuffer_crit_test
+	#@make lifobuffer_crit_test
+	@make ringbuffer_crit_test
+
 fclean: clean
 	@$(RM) $(NAME)
 	@$(RM) -rf *.dSYM

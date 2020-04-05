@@ -126,6 +126,8 @@ Test(generic, insert_remove)
 		cr_assert(ptr->v->size(ptr) == 2);
 		cr_assert(strcmp(ptr->v->get(ptr, 0), "String 0") == 0);
 		cr_assert(strcmp(ptr->v->get(ptr, 1), "String 2") == 0);
+		cr_assert(ptr->v->insert(ptr, -1, "String f") > 0);
+		cr_assert(ptr->v->insert(ptr, 3, "String f") > 0);
 
 		str = strdup("String 1");
 		cr_assert(ptr->v->insert(ptr, 1, str) == 0);
@@ -133,6 +135,8 @@ Test(generic, insert_remove)
 		cr_assert(strcmp(ptr->v->get(ptr, 0), "String 0") == 0);
 		cr_assert(strcmp(ptr->v->get(ptr, 1), "String 1") == 0);
 		cr_assert(strcmp(ptr->v->get(ptr, 2), "String 2") == 0);
+
+		cr_assert(ptr->v->insert(ptr, 2, "String cap") > 0);
 
 		ptr->v->remove(ptr, 1);
 		cr_assert(ptr->v->size(ptr) == 2);

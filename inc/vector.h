@@ -28,9 +28,11 @@ struct Vector {
 	int		(*pushback)(void *, void *);
 	int		(*pushfront)(void *, void *);
 	void	*(*peek)(void *);
+	void	*(*peekback)(void *);
+	void	*(*peekfront)(void *);
 	void	(*pop)(void *);
-	//void	(*popback)(void *);
-	//void	(*popfront)(void *);
+	void	(*popback)(void *);
+	void	(*popfront)(void *);
 	void	*(*get)(void *, size_t );
 	int		(*set)(void *, size_t , void *);
 	int		(*insert)(void *, size_t , void *);
