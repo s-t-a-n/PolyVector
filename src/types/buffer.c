@@ -292,6 +292,8 @@ const struct Vector _Buffer = {
 	ctor,
 	dtor,
 	clone,
+	NULL,
+	NULL,
 	push,
 	pushback,
 	pushfront,

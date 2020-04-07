@@ -11,11 +11,13 @@ SRC =	$(SRC_D)/vector.c													\
 		$(SRC_D)/types/lifobuffer.c											\
 		$(SRC_D)/types/ringbuffer.c											\
 		$(SRC_D)/types/buffer.c												\
+		$(SRC_D)/types/ringbuffer_mt.c										\
 
 INC =	$(INC_D)/vector.h													\
 		$(INC_D)/types/fifobuffer.h											\
 		$(INC_D)/types/lifobuffer.h											\
 		$(INC_D)/types/ringbuffer.h											\
+		$(INC_D)/types/ringbuffer_mt.h										\
 		$(INC_D)/types/buffer.h												\
 
 OBJ :=	$(SRC:$(SRC_D)/%.c=$(OBJ_D)/%.o)
@@ -136,6 +138,28 @@ ringbuffer_crit_test: $(NAME)
     fi
 	@$(RM) -f $(CC_LOG) $(CC_ERROR)
 
+ringbuffer_mt_crit_test: TEST='ringbuffer_mt_crit_t'
+ringbuffer_mt_crit_test: $(NAME)
+	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)
+	@$(CC) $(CC_FLAGS) -I$(INC_D) -lcriterion -o $(TEST) tests/$(TEST).c $(NAME)
+	@if test -e $(CC_ERROR); then                                           \
+        $(ECHO) "$(ERROR_STRING)\n" && $(CAT) $(CC_LOG);					\
+    elif test -s $(CC_LOG); then                                            \
+        $(ECHO) "$(WARN_STRING)\n" && $(CAT) $(CC_LOG);                     \
+    else                                                                    \
+        $(ECHO) "$(OK_STRING)\n";                                           \
+    fi
+	@$(ECHO) "Running $(TEST)...\n"
+	@time $(DBG) ./$(TEST) $(CRIT_FLAGS) && $(RM) -f $(TEST) && $(RM) -rf $(TEST).dSYM 2>$(CC_LOG) || touch $(CC_ERROR)
+	@if test -e $(CC_ERROR); then                                           \
+		$(ECHO) "Completed $(TEST): $(ERROR_STRING)\n" && $(CAT) $(CC_LOG);		\
+    elif test -s $(CC_LOG); then											\
+		$(ECHO) "Completed $(TEST): $(WARN_STRING)\n" && $(CAT) $(CC_LOG);		\
+    else                                                                    \
+		$(ECHO) "Completed $(TEST): $(OK_STRING)\n";								\
+    fi
+	@$(RM) -f $(CC_LOG) $(CC_ERROR)
+
 buffer_test: TEST='buffer_t'
 buffer_test: $(NAME)
 	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)
@@ -207,6 +231,7 @@ test: $(NAME)
 	#@make fifobuffer_crit_test
 	#@make lifobuffer_crit_test
 	@make ringbuffer_crit_test
+	@make ringbuffer_mt_crit_test
 
 fclean: clean
 	@$(RM) $(NAME)

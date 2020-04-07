@@ -24,6 +24,8 @@ struct Vector {
 	void	*(*ctor)(void *, va_list *);
 	void	*(*dtor)(void *);
 	void	*(*clone)(void *);
+	void	*(*safe_get)(void *);
+	int		(*safe_add)(void *, void *);
 	int		(*push)(void *, void *);
 	int		(*pushback)(void *, void *);
 	int		(*pushfront)(void *, void *);

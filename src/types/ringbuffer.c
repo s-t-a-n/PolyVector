@@ -1,7 +1,7 @@
 /*
  * =====================================================================================
  *
- *       Filename:  fifobuffer.c
+ *       Filename:  ringbuffer.c
  *
  *    Description:  static ringbuffer with first-in first-out push/pop
  *    				(frees and overwrites when buffer is full)
@@ -100,7 +100,7 @@ static void		*clone(void *_self)
 	return (clone);
 }
 
-static int		push(void *_self, void *item)
+static int		pushback(void *_self, void *item)
 {
 	struct RingBuffer *self = _self;
 
@@ -116,16 +116,16 @@ static int		push(void *_self, void *item)
 	return (0);
 }
 
-static int		pushback(void *_self, void *item)
-{
-	return (push(_self, item));
-}
-
 static int		pushfront(void *self, void *item)
 {
 	return (VEC_STB);
 	(void)self;
 	(void)item;
+}
+
+static int		push(void *_self, void *item)
+{
+	return (pushback(_self, item));
 }
 
 static void		*peekback(void *_self)
@@ -218,6 +218,8 @@ const struct Vector _RingBuffer = {
 	ctor,
 	dtor,
 	clone,
+	NULL,
+	NULL,
 	push,
 	pushback,
 	pushfront,

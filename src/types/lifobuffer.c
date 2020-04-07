@@ -195,6 +195,8 @@ const struct Vector _LiFoBuffer = {
 	ctor,
 	dtor,
 	clone,
+	NULL,
+	NULL,
 	push,
 	pushback,
 	pushfront,
