@@ -253,7 +253,7 @@ static int		safe_add(void *_self, void *element)
 			error += pthread_mutex_unlock(&self->lock);
 			error += pthread_cond_signal(&self->signal);
 	}
-	return(error);
+	return(abs(error));
 }
 
 const struct Vector _RingBufferMT = {

@@ -36,6 +36,10 @@ static void	t_flush_buffer(void *vec)
 			free(ptr->v->peek(ptr));
 			ptr->v->pop(ptr);
 		}
+
+		cr_assert(ptr->v->peek(ptr) == NULL);
+		cr_assert(ptr->v->size(ptr) == 0);
+		vecdestroy(ptr);
 }
 
 Test(generic, init_destroy)
@@ -48,64 +52,58 @@ Test(generic, init_destroy)
 Test(generic, cap_abccap)
 {
 		int cap = 1;
-		int abscap = 2;
+		int abscap = 3;
 		struct Buffer *ptr = vecnew(Buffer, cap, abscap, free, strdup);
 		cr_assert_not_null(ptr);
 
-		void *str = strdup("String");
-		int error = ptr->v->push(ptr, str);
-		cr_assert(error == 0);
+		void *str = strdup("String 0");
+		cr_assert(ptr->v->push(ptr, str) == 0);
 
-		str = strdup("String");
-		error = ptr->v->push(ptr, str);
-		cr_assert(error == 0);
+		str = strdup("String 1");
+		cr_assert(ptr->v->push(ptr, str) == 0);
 
-		str = strdup("String");
-		error = ptr->v->push(ptr, str);
-		cr_assert(error > 0);
+		str = strdup("String 2");
+		cr_assert(ptr->v->push(ptr, str) == 0);
+
+		str = strdup("String 3");
+		cr_assert(ptr->v->push(ptr, str) > 0);
 		free(str);
 
-		cr_assert(ptr->v->size(ptr) == 2);
+		cr_assert(ptr->size == 3);
+		cr_assert(ptr->cap == 3);
+
 		t_flush_buffer(ptr);
-		cr_assert(ptr->v->peek(ptr) == NULL);
-		cr_assert(ptr->v->size(ptr) == 0);
-		vecdestroy(ptr);
 }
 
 Test(generic, push_peek)
 {
 		struct Buffer *ptr = vecnew(Buffer, 1, 1, free, strdup);
 		cr_assert_not_null(ptr);
+
 		void *str = strdup("String");
-		int error = ptr->v->push(ptr, str);
-		cr_assert(error == 0);
+		cr_assert(ptr->v->push(ptr, str) == 0);
 		cr_assert(strcmp(ptr->v->peek(ptr), str) == 0);
 		cr_assert(ptr->v->size(ptr) == 1);
-		free(ptr->v->peek(ptr));
-		ptr->v->pop(ptr);
-		cr_assert(ptr->v->peek(ptr) == NULL);
-		cr_assert(ptr->v->size(ptr) == 0);
-		vecdestroy(ptr);
+
+		t_flush_buffer(ptr);
 }
 
 Test(generic, set_get)
 {
 		struct Buffer *ptr = vecnew(Buffer, 1, 1, free, strdup);
 		cr_assert_not_null(ptr);
+
 		void *str = strdup("String");
-		int error = ptr->v->push(ptr, str);
-		cr_assert(error == 0);
+		cr_assert(ptr->v->push(ptr, str) == 0);
 		cr_assert(strcmp(ptr->v->peek(ptr), str) == 0);
+
 		str = strdup("gnirtS");
 		cr_assert(ptr->v->set(ptr, 0, str) == 0);
 		cr_assert(ptr->v->size(ptr) == 1);
 		cr_assert(strcmp(ptr->v->get(ptr, 0), str) == 0);
 		cr_assert(strcmp(ptr->v->peek(ptr), str) == 0);
-		free(ptr->v->peek(ptr));
-		ptr->v->pop(ptr);
-		cr_assert(ptr->v->peek(ptr) == NULL);
-		cr_assert(ptr->v->size(ptr) == 0);
-		vecdestroy(ptr);
+
+		t_flush_buffer(ptr);
 }
 
 Test(generic, insert_remove)
@@ -116,12 +114,10 @@ Test(generic, insert_remove)
 		struct Buffer *ptr = vecnew(Buffer, cap, abscap, free, strdup);
 		cr_assert_not_null(ptr);
 		void *str = strdup("String 0");
-		int error = ptr->v->push(ptr, str);
-		cr_assert(error == 0);
+		cr_assert(ptr->v->push(ptr, str) == 0);
 
 		str = strdup("String 2");
-		error = ptr->v->push(ptr, str);
-		cr_assert(error == 0);
+		cr_assert(ptr->v->push(ptr, str) == 0);
 
 		cr_assert(ptr->v->size(ptr) == 2);
 		cr_assert(strcmp(ptr->v->get(ptr, 0), "String 0") == 0);
@@ -144,7 +140,4 @@ Test(generic, insert_remove)
 		cr_assert(strcmp(ptr->v->get(ptr, 1), "String 2") == 0);
 
 		t_flush_buffer(ptr);
-		cr_assert(ptr->v->peek(ptr) == NULL);
-		cr_assert(ptr->v->size(ptr) == 0);
-		vecdestroy(ptr);
 }

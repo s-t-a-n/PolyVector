@@ -36,6 +36,10 @@ static void	t_flush_buffer(void *vec)
 			free(ptr->v->peek(ptr));
 			ptr->v->pop(ptr);
 		}
+
+		cr_assert(ptr->v->peek(ptr) == NULL);
+		cr_assert(ptr->v->size(ptr) == 0);
+		vecdestroy(ptr);
 }
 
 Test(generic, init_destroy)
@@ -55,9 +59,6 @@ Test(generic, push_peek)
 		cr_assert(strcmp(ptr->v->peek(ptr), str) == 0);
 		cr_assert(ptr->v->size(ptr) == 1);
 		t_flush_buffer(ptr);
-		cr_assert(ptr->v->peek(ptr) == NULL);
-		cr_assert(ptr->v->size(ptr) == 0);
-		vecdestroy(ptr);
 }
 
 Test(generic, ring)
@@ -84,10 +85,6 @@ Test(generic, ring)
 		ptr->v->pop(ptr);
 
 		cr_assert(strcmp(ptr->v->peek(ptr), "String 1") == 0);
-		free(ptr->v->peek(ptr));
-		ptr->v->pop(ptr);
 
-		cr_assert(ptr->v->peek(ptr) == NULL);
-		cr_assert(ptr->v->size(ptr) == 0);
-		vecdestroy(ptr);
+		t_flush_buffer(ptr);
 }
