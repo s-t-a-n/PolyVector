@@ -69,44 +69,57 @@ static void		*dtor(void *_self)
 
 static void		*clone(void *_self)
 {
-	const struct RingBufferMT	*self = _self;
+	struct RingBufferMT	*self = _self;
 	struct RingBufferMT	*clone;
 
-	clone = malloc(self->v->selfsize);
-	if (clone)
+	if (pthread_mutex_lock(&self->lock) == 0)
 	{
-		clone->mem = malloc(self->cap * sizeof(void *));
-		if (clone->mem)
+		clone = malloc(self->v->selfsize);
+		if (clone)
 		{
-			clone->v = self->v;
-			clone->cap = self->cap;
-			clone->size = self->size;
-			clone->front = self->front;
-			clone->back = self->back;
-			clone->free = self->free;
-			clone->clone = self->clone;
-
-			for (size_t i = 0; i < self->size; i++)
+			if (pthread_mutex_init(&clone->lock, NULL) != 0 ||
+				pthread_cond_init(&clone->signal, NULL) != 0)
 			{
-				if (self->front + i >= self->cap)
+				free(clone);
+				pthread_mutex_unlock(&self->lock);
+				return(NULL);
+			}
+			clone->mem = malloc(self->cap * sizeof(void *));
+			if (clone->mem)
+			{
+				clone->v = self->v;
+				clone->cap = self->cap;
+				clone->size = self->size;
+				clone->front = self->front;
+				clone->back = self->back;
+				clone->free = self->free;
+				clone->clone = self->clone;
+
+				for (size_t i = 0; i < self->size; i++)
 				{
-					const int j = self->front + i - self->cap;
-					clone->mem[j] = self->clone(self->mem[j]);
-				}
-				else
-				{
-					const int k = self->front + i;
-					clone->mem[k] = self->clone(self->mem[k]);
+					if (self->front + i >= self->cap)
+					{
+						const int j = self->front + i - self->cap;
+						clone->mem[j] = self->clone(self->mem[j]);
+					}
+					else
+					{
+						const int k = self->front + i;
+						clone->mem[k] = self->clone(self->mem[k]);
+					}
 				}
 			}
+			else
+			{
+				free(clone);
+				clone = NULL;
+			}
 		}
-		else
-		{
-			free(clone);
-			clone = NULL;
-		}
+		pthread_mutex_unlock(&self->lock);
+		return (clone);
 	}
-	return (clone);
+	else
+		return(NULL);
 }
 
 static int		pushback(void *_self, void *item)
@@ -222,7 +235,8 @@ static size_t	size(void *_self)
 	return (self->size);
 }
 
-static void		*safe_get(void *_self)
+
+static void		*safe_pop(void *_self)
 {
 	struct RingBufferMT *self = _self;
 	void *element;
@@ -241,7 +255,7 @@ static void		*safe_get(void *_self)
 		return(NULL);
 }
 
-static int		safe_add(void *_self, void *element)
+static int		safe_push(void *_self, void *element)
 {
 	struct RingBufferMT *self = _self;
 	int					error;
@@ -261,8 +275,8 @@ const struct Vector _RingBufferMT = {
 	ctor,
 	dtor,
 	clone,
-	safe_get,
-	safe_add,
+	safe_pop,
+	safe_push,
 	push,
 	pushback,
 	pushfront,

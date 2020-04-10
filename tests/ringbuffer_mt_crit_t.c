@@ -104,7 +104,7 @@ static void *t_main(void *_ptr)
 {
 	struct RingBufferMT *ptr = _ptr;
 
-	void *item = ptr->v->safe_get(ptr);
+	void *item = ptr->v->safe_pop(ptr);
 	cr_assert(item != NULL);
 	return(item);
 }
@@ -121,6 +121,7 @@ Test(threading, safeset_safeget)
 		{
 			 cr_assert(pthread_create(&threads[i], NULL, t_main, ptr) == 0);
 		}
+		usleep(10000); /* allow threads time to process */
 
 		for (int i = 0; i < tcount; i++)
 		{
@@ -131,12 +132,10 @@ Test(threading, safeset_safeget)
 		for (int i = 0; i < tcount; i++)
 		{
 			void *str = strdup("String");
-			cr_assert(ptr->v->safe_add(ptr, str) == 0);
+			cr_assert(ptr->v->safe_push(ptr, str) == 0);
 		}
+		usleep(10000); /* allow threads time to process */
 
-		/* sleep to let threads handle items added, then check if threads
-		 * are finished */
-		usleep(1000);
 		for (int i = 0; i < tcount; i++)
 		{
 			void *ret;

@@ -44,9 +44,52 @@ static void	t_flush_buffer(void *vec)
 
 Test(generic, init_destroy)
 {
-		void *ptr = vecnew(Buffer, 1, 1, NULL, free, strdup);
+		void *ptr = vecnew(Buffer, 1, 1, free, strdup);
 		cr_assert_not_null(ptr);
 		vecdestroy(ptr);
+}
+
+Test(generic, clone)
+{
+		int tcount = 10;
+
+		struct Buffer *ptr = vecnew(Buffer, tcount / 2, tcount * 2, free, strdup);
+		cr_assert_not_null(ptr);
+
+
+		for (int i = 0; i < tcount; i++)
+		{
+			char buf[16];
+			snprintf(buf, 16, "String %i", i);
+
+			void *str = strdup(buf);
+			cr_assert(ptr->v->push(ptr, str) == 0);
+		}
+
+		struct Buffer *ptrc = vecclone(ptr);
+		cr_assert_not_null(ptrc);
+
+		for (int i = tcount - 1; i >= 0; i--)
+		{
+			char buf[16];
+			snprintf(buf, 16, "String %i", i);
+
+			void *retc = ptrc->v->peek(ptrc);
+			cr_assert_not_null(retc);
+			cr_assert(strcmp(retc, buf) == 0);
+			ptrc->v->pop(ptrc);
+				
+			void *ret = ptr->v->peek(ptr);
+			cr_assert_not_null(ret);
+			cr_assert(strcmp(ret, buf) == 0);
+			ptrc->v->pop(ptr);
+
+			free(ret);
+			free(retc);
+		}
+
+		t_flush_buffer(ptr);
+		t_flush_buffer(ptrc);
 }
 
 Test(generic, cap_abccap)
