@@ -47,8 +47,22 @@ CC = clang
 # compile flags
 CC_FLAGS = -Werror -Wextra -Wall
 
-## debugging or optimization flags
+# testing flags
+TLIBS = -lcriterion
 
+# os variables
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+    OS = LINUX
+    CC_FLAGS += -D LINUX
+    TLIBS += -lpthread
+endif
+ifeq ($(UNAME_S),Darwin)
+    OS = OSX
+    CC_FLAGS += -D OSX 
+endif
+
+## debugging or optimization flags
 # specify DEBUG=1 to compile with debugging flags
 ifeq ($(DEBUG),1)
     CC_FLAGS += -g -fsanitize=address -DDEBUG
@@ -102,7 +116,23 @@ clean:
 buffer_crit_test: TEST='buffer_crit_t'
 buffer_crit_test: $(NAME)
 	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)
-	@$(CC) $(CC_FLAGS) -I$(INC_D) -lcriterion -o $(TEST).testbin tests/$(TEST).c $(NAME)
+	@$(CC) $(CC_FLAGS) -I$(INC_D) -o $(TEST).testbin tests/$(TEST).c $(NAME) $(TLIBS)
+	@if test -e $(CC_ERROR); then                                           \
+        $(ECHO) "$(ERROR_STRING)\n" && $(CAT) $(CC_LOG);					\
+    elif test -s $(CC_LOG); then                                            \
+        $(ECHO) "$(WARN_STRING)\n" && $(CAT) $(CC_LOG);                     \
+    else                                                                    \
+        $(ECHO) "$(OK_STRING)\n";                                           \
+    fi
+	@$(ECHO) "Running $(TEST)...\n"
+	@$(DBG) ./$(TEST).testbin $(CRIT_FLAGS) && $(RM) -f $(TEST).testbin && $(RM) -rf $(TEST).dSYM 2>$(CC_LOG)
+	@# output removed; criterion is clear enough
+	@$(RM) -f $(CC_LOG) $(CC_ERROR)
+
+fifobuffer_crit_test: TEST='fifobuffer_crit_t'
+fifobuffer_crit_test: $(NAME)
+	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)
+	@$(CC) $(CC_FLAGS) -I$(INC_D) -o $(TEST).testbin tests/$(TEST).c $(NAME) $(TLIBS)
 	@if test -e $(CC_ERROR); then                                           \
         $(ECHO) "$(ERROR_STRING)\n" && $(CAT) $(CC_LOG);					\
     elif test -s $(CC_LOG); then                                            \
@@ -118,7 +148,7 @@ buffer_crit_test: $(NAME)
 ringbuffer_crit_test: TEST='ringbuffer_crit_t'
 ringbuffer_crit_test: $(NAME)
 	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)
-	@$(CC) $(CC_FLAGS) -I$(INC_D) -lcriterion -o $(TEST).testbin tests/$(TEST).c $(NAME)
+	@$(CC) $(CC_FLAGS) -I$(INC_D) -o $(TEST).testbin tests/$(TEST).c $(NAME) $(TLIBS)
 	@if test -e $(CC_ERROR); then                                           \
         $(ECHO) "$(ERROR_STRING)\n" && $(CAT) $(CC_LOG);					\
     elif test -s $(CC_LOG); then                                            \
@@ -134,7 +164,7 @@ ringbuffer_crit_test: $(NAME)
 ringbuffer_mt_crit_test: TEST='ringbuffer_mt_crit_t'
 ringbuffer_mt_crit_test: $(NAME)
 	@$(ECHO) "Compiling $(TEST).c..." 2>$(CC_LOG) || touch $(CC_ERROR)
-	@$(CC) $(CC_FLAGS) -I$(INC_D) -lcriterion -o $(TEST).testbin tests/$(TEST).c $(NAME)
+	@$(CC) $(CC_FLAGS) -I$(INC_D) -o $(TEST).testbin tests/$(TEST).c $(NAME) $(TLIBS)
 	@if test -e $(CC_ERROR); then                                           \
         $(ECHO) "$(ERROR_STRING)\n" && $(CAT) $(CC_LOG);					\
     elif test -s $(CC_LOG); then                                            \
@@ -213,9 +243,9 @@ lifobuffer_test: $(NAME)
     fi
 	@$(RM) -f $(CC_LOG) $(CC_ERROR)
 
-test: $(NAME)
+alltests: $(NAME)
 	@make buffer_crit_test
-	@#@make fifobuffer_crit_test
+	@make fifobuffer_crit_test
 	@#@make lifobuffer_crit_test
 	@make ringbuffer_crit_test
 	@make ringbuffer_mt_crit_test

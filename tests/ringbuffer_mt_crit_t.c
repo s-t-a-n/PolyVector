@@ -59,6 +59,60 @@ Test(generic, init_destroy)
 		vecdestroy(ptr);
 }
 
+Test(generic, clone)
+{
+		int tcount = 10;
+
+		struct RingBufferMT *ptr = vecnew(RingBufferMT, tcount, free, strdup);
+		cr_assert_not_null(ptr);
+
+		for (int i = 0; i < tcount; i++)
+		{
+			char buf[16];
+			snprintf(buf, 16, "String %i", i);
+
+			void *str = strdup(buf);
+			cr_assert(ptr->v->safe_push(ptr, str) == 0);
+		}
+
+		/* overwrite test */
+		cr_assert(ptr->v->safe_push(ptr, strdup("Overwrite")) == 0);
+
+		struct RingBufferMT *ptrc = vecclone(ptr);
+		cr_assert_not_null(ptrc);
+
+		void *retc = ptrc->v->safe_pop(ptrc);
+		cr_assert_not_null(retc);
+		cr_assert(strcmp(retc, "Overwrite") == 0);
+
+		void *ret = ptr->v->safe_pop(ptr);
+		cr_assert_not_null(ret);
+		cr_assert(strcmp(ret, "Overwrite") == 0);
+
+		free(ret);
+		free(retc);
+
+		for (int i = 1; i < tcount; i++)
+		{
+			char buf[16];
+			snprintf(buf, 16, "String %i", i);
+
+			void *retc = ptrc->v->safe_pop(ptrc);
+			cr_assert_not_null(retc);
+			cr_assert(strcmp(retc, buf) == 0);
+
+			void *ret = ptr->v->safe_pop(ptr);
+			cr_assert_not_null(ret);
+			cr_assert(strcmp(ret, buf) == 0);
+
+			free(ret);
+			free(retc);
+		}
+
+		t_flush_buffer(ptr);
+		t_flush_buffer(ptrc);
+}
+
 Test(generic, push_peek)
 {
 		struct RingBufferMT *ptr = vecnew(RingBufferMT, 1, free, strdup);
@@ -78,17 +132,14 @@ Test(generic, ring)
 		cr_assert_not_null(ptr);
 
 		void *str = strdup("String 0");
-		int error = ptr->v->push(ptr, str);
-		cr_assert(error == 0);
+		cr_assert(ptr->v->push(ptr, str) == 0);
 
 		str = strdup("String 1");
-		error = ptr->v->push(ptr, str);
-		cr_assert(error == 0);
+		cr_assert(ptr->v->push(ptr, str) == 0);
 		cr_assert(ptr->v->size(ptr) == 2);
 
 		str = strdup("String 2");
-		error = ptr->v->push(ptr, str);
-		cr_assert(error == 0);
+		cr_assert(ptr->v->push(ptr, str) == 0);
 		cr_assert(ptr->v->size(ptr) == 2);
 
 		cr_assert(strcmp(ptr->v->peek(ptr), "String 2") == 0);
