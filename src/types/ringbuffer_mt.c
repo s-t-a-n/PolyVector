@@ -236,7 +236,7 @@ static size_t	size(void *_self)
 }
 
 
-static void		*safe_pop(void *_self)
+static void		*safepop(void *_self)
 {
 	struct RingBufferMT *self = _self;
 	void *element;
@@ -255,7 +255,7 @@ static void		*safe_pop(void *_self)
 		return(NULL);
 }
 
-static int		safe_push(void *_self, void *element)
+static int		safepush(void *_self, void *element)
 {
 	struct RingBufferMT *self = _self;
 	int					error;
@@ -275,8 +275,8 @@ const struct Vector _RingBufferMT = {
 	ctor,
 	dtor,
 	clone,
-	safe_pop,
-	safe_push,
+	safepop,
+	safepush,
 	push,
 	pushback,
 	pushfront,

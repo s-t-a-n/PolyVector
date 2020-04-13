@@ -147,7 +147,6 @@ static int		pushfront(void *_self, void *item)
 		if (err != 0)
 			return (err);
 	}
-	self->mem[self->front] = item;
 	if (self->front == 0)
 	{
 		memmove(self->mem + 1, self->mem, self->size * sizeof(void *));
@@ -155,6 +154,7 @@ static int		pushfront(void *_self, void *item)
 	}
 	else
 		(self->front)--;
+	self->mem[self->front] = item;
 	(self->size)++;
 	return (0);
 }

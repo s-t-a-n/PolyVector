@@ -1,9 +1,9 @@
 /*
  * =====================================================================================
  *
- *       Filename:  fifobuffer_crit.c
+ *       Filename:  lifobuffer_crit.c
  *
- *    Description:  Basic tests of fifobuffer using Criterion
+ *    Description:  Basic tests of lifobuffer using Criterion
  *
  *        Version:  1.0
  *        Created:  23-03-20 14:34:39
@@ -25,11 +25,11 @@
 #include <stdlib.h>
 
 #include "vector.h"
-#include "types/fifobuffer.h"
+#include "types/lifobuffer.h"
 
 static void	t_flush_buffer(void *vec)
 {
-		struct FiFoBuffer *ptr = vec;
+		struct LiFoBuffer *ptr = vec;
 	
 		while (ptr->v->size(ptr) > 0)
 		{
@@ -44,7 +44,7 @@ static void	t_flush_buffer(void *vec)
 
 Test(generic, init_destroy)
 {
-		void *ptr = vecnew(FiFoBuffer, 1, free, strdup);
+		void *ptr = vecnew(LiFoBuffer, 1, free, strdup);
 		cr_assert_not_null(ptr);
 		vecdestroy(ptr);
 }
@@ -53,7 +53,7 @@ Test(generic, clone)
 {
 		int tcount = 10;
 
-		struct FiFoBuffer *ptr = vecnew(FiFoBuffer, tcount, free, strdup);
+		struct LiFoBuffer *ptr = vecnew(LiFoBuffer, tcount, free, strdup);
 		cr_assert_not_null(ptr);
 
 		for (int i = 0; i < tcount; i++)
@@ -67,10 +67,10 @@ Test(generic, clone)
 
 		cr_assert(ptr->v->push(ptr, "") > 0);
 
-		struct FiFoBuffer *ptrc = vecclone(ptr);
+		struct LiFoBuffer *ptrc = vecclone(ptr);
 		cr_assert_not_null(ptrc);
 
-		for (int i = 0; i < tcount; i++)
+		for (int i = tcount - 1; i >= 0; i--)
 		{
 			char buf[16];
 			snprintf(buf, 16, "String %i", i);
@@ -95,7 +95,7 @@ Test(generic, clone)
 
 Test(generic, push_peek)
 {
-		struct FiFoBuffer *ptr = vecnew(FiFoBuffer, 1, free, strdup);
+		struct LiFoBuffer *ptr = vecnew(LiFoBuffer, 1, free, strdup);
 		cr_assert_not_null(ptr);
 
 		void *str = strdup("String");
@@ -138,7 +138,7 @@ Test(generic, free_clone)
 {
 	int cap = 1;
 
-	struct FiFoBuffer *ptr = vecnew(FiFoBuffer, cap, t_free, t_clone);
+	struct LiFoBuffer *ptr = vecnew(LiFoBuffer, cap, t_free, t_clone);
 	cr_assert_not_null(ptr);
 
 	struct t_struct *p = malloc(sizeof(struct t_struct));
@@ -156,7 +156,7 @@ Test(generic, free_clone)
 	cr_assert(ptr->v->push(ptr, p) == 0);
 	cr_assert(ptr->v->size(ptr) == 1);
 
-	struct FiFoBuffer *nptr = vecclone(ptr);
+	struct LiFoBuffer *nptr = vecclone(ptr);
 
 	cr_assert(strcmp(((struct t_struct *)(ptr->v->peek(ptr)))->m1, "String m1") == 0);
 	cr_assert(strcmp(((struct t_struct *)(ptr->v->peek(ptr)))->m2, "String m2") == 0);

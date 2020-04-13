@@ -33,7 +33,7 @@ static void	t_flush_buffer(void *vec)
 	
 		while (ptr->v->size(ptr) > 0)
 		{
-			free(ptr->v->peek(ptr));
+			ptr->free(ptr->v->peek(ptr));
 			ptr->v->pop(ptr);
 		}
 
@@ -141,4 +141,70 @@ Test(generic, ring)
 		cr_assert(strcmp(ptr->v->peek(ptr), "String 1") == 0);
 
 		t_flush_buffer(ptr);
+}
+
+struct t_struct {
+	void *m1;
+	size_t m1_len;
+	void *m2;
+	size_t m2_len;
+};
+
+static void *t_clone(void *_p)
+{
+	const struct t_struct *p = _p;
+
+	struct t_struct *np = malloc(sizeof(struct t_struct));
+	np->m1 = malloc(p->m1_len); memcpy(np->m1, p->m1, p->m1_len);
+	np->m1_len = p->m1_len;
+	np->m2 = malloc(p->m2_len); memcpy(np->m2, p->m2, p->m2_len);
+	np->m2_len = p->m2_len;
+	return(np);
+}
+
+static void t_free(void *_p)
+{
+	const struct t_struct *p = _p;
+
+	free(p->m1);
+	free(p->m2);
+	free(_p);
+}
+
+Test(generic, free_clone)
+{
+	int cap = 1;
+
+	struct RingBuffer *ptr = vecnew(RingBuffer, cap, t_free, t_clone);
+	cr_assert_not_null(ptr);
+
+	struct t_struct *p = malloc(sizeof(struct t_struct));
+	p->m1_len = 1024;
+	p->m1 = malloc(p->m1_len);
+	p->m2_len = 1024;
+	p->m2 = malloc(p->m2_len);
+
+	sprintf(p->m1, "String m1");
+	sprintf(p->m2, "String m2");
+
+	sprintf(p->m1 + 512, "String m1 offset");
+	sprintf(p->m2 + 512, "String m2 offset");
+
+	cr_assert(ptr->v->push(ptr, p) == 0);
+	cr_assert(ptr->v->size(ptr) == 1);
+
+	struct RingBuffer *nptr = vecclone(ptr);
+
+	cr_assert(strcmp(((struct t_struct *)(ptr->v->peek(ptr)))->m1, "String m1") == 0);
+	cr_assert(strcmp(((struct t_struct *)(ptr->v->peek(ptr)))->m2, "String m2") == 0);
+	cr_assert(strcmp(((struct t_struct *)(ptr->v->peek(ptr)))->m1 + 512, "String m1 offset") == 0);
+	cr_assert(strcmp(((struct t_struct *)(ptr->v->peek(ptr)))->m2 + 512, "String m2 offset") == 0);
+
+	cr_assert(strcmp(((struct t_struct *)(nptr->v->peek(nptr)))->m1, "String m1") == 0);
+	cr_assert(strcmp(((struct t_struct *)(nptr->v->peek(nptr)))->m2, "String m2") == 0);
+	cr_assert(strcmp(((struct t_struct *)(nptr->v->peek(nptr)))->m1 + 512, "String m1 offset") == 0);
+	cr_assert(strcmp(((struct t_struct *)(nptr->v->peek(nptr)))->m2 + 512, "String m2 offset") == 0);
+
+	t_flush_buffer(ptr);
+	t_flush_buffer(nptr);
 }
